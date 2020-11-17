@@ -8,11 +8,12 @@ import { createConnection } from 'typeorm';
 import resolvers from './modules/index';
 import ExtendedRequest from './types/ExtendedRequest';
 import { TOKEN_SECRET, PORT, API_URI } from './config';
+import authChecker from './util/authChecker';
 
 const main = async (): Promise<void> => {
   await createConnection();
 
-  const schema = await buildSchema({ resolvers });
+  const schema = await buildSchema({ resolvers, authChecker });
 
   const app = express();
   app.use(cors());
