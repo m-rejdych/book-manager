@@ -19,7 +19,6 @@ class User {
     @Arg('id', () => ID, { nullable: true }) id: string,
     @Ctx() ctx: Context,
   ): Promise<UserEntity> {
-    console.log(ctx);
     if (!ctx.user) throw new ForbiddenError();
 
     if (!id) {

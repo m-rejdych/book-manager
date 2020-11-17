@@ -5,6 +5,7 @@
 **/.pnp
 **/.pnp.js
 **/ormconfig.json
+**/codegen.yml
 
 # testing
 **/coverage
