@@ -1,8 +1,7 @@
 import {
   Entity,
   PrimaryGeneratedColumn,
-  ManyToMany,
-  JoinTable,
+  OneToMany,
   BaseEntity,
   Column,
 } from 'typeorm';
@@ -21,10 +20,9 @@ class Category extends BaseEntity {
   @Field()
   name: string;
 
-  @ManyToMany(() => Book, (book) => book.categories, {
-    cascade: true,
+  @OneToMany(() => Book, (book) => book.category, {
+    cascade: ['insert', 'update'],
   })
-  @JoinTable()
   @Field(() => [Book])
   books: Book[];
 }

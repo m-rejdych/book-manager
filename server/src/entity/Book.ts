@@ -4,12 +4,10 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  ManyToMany,
 } from 'typeorm';
 import { ObjectType, Field, ID } from 'type-graphql';
 
 import User from './User';
-import Author from './Author';
 import Category from './Category';
 
 @Entity()
@@ -23,6 +21,18 @@ class Book extends BaseEntity {
   @Field()
   title: string;
 
+  @Column()
+  @Field()
+  author: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  description: string;
+
+  @Column()
+  @Field()
+  isRead: boolean;
+
   @ManyToOne(() => User, (user) => user.books, {
     cascade: true,
     onDelete: 'CASCADE',
@@ -30,18 +40,11 @@ class Book extends BaseEntity {
   @Field(() => User)
   user: User;
 
-  @ManyToOne(() => Author, (author) => author.books, {
-    cascade: true,
-    onDelete: 'CASCADE',
-  })
-  @Field(() => Author)
-  author: Author;
-
-  @ManyToMany(() => Category, (category) => category.books, {
+  @ManyToOne(() => Category, (category) => category.books, {
     cascade: ['insert', 'update'],
   })
-  @Field(() => [Category])
-  categories: Category[];
+  @Field(() => Category)
+  category: Category;
 }
 
 export default Book;
