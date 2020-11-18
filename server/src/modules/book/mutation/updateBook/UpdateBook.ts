@@ -1,25 +1,25 @@
 import {
   Resolver,
   Mutation,
-  Authorized,
   Ctx,
+  Authorized,
   Arg,
   ForbiddenError,
 } from 'type-graphql';
 
+import UpdateBookInput from './UpdateBookInput';
 import Book from '../../../../entity/Book';
 import User from '../../../../entity/User';
 import Category from '../../../../entity/Category';
-import CreateBookInput from './CreateBookInput';
 import Context from '../../../../types/Context';
 
 @Resolver()
-class CreateBook {
+class UpdateBook {
   @Authorized()
   @Mutation(() => Book)
-  async createBook(
+  async updateBook(
     @Arg('data')
-    { title, description, category, isRead, author }: CreateBookInput,
+    { title, author, description, bookId, category, isRead }: UpdateBookInput,
     @Ctx() ctx: Context,
   ): Promise<Book> {
     if (!ctx.user) throw new ForbiddenError();
@@ -28,22 +28,22 @@ class CreateBook {
     const user = await User.findOne(userId);
     if (!user) throw new Error('User not found!');
 
+    const book = await Book.findOne(bookId);
+    if (!book) throw new Error('Book not found!');
+
     let categoryInstance = await Category.findOne({ name: category });
     if (!categoryInstance)
       categoryInstance = Category.create({ name: category });
 
-    const book = Book.create({
-      title,
-      description: description || undefined,
-      category: categoryInstance,
-      isRead,
-      user,
-      author,
-    });
+    book.title = title;
+    book.author = author;
+    book.description = description;
+    book.isRead = isRead;
+    book.category = categoryInstance;
     await book.save();
 
     return book;
   }
 }
 
-export default CreateBook;
+export default UpdateBook;
