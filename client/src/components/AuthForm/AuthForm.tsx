@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { formatError } from 'graphql';
 import { Formik, Form } from 'formik';
 import { useLocation, useHistory } from 'react-router-dom';
 import { VStack, Button, Text } from '@chakra-ui/react';
@@ -11,8 +12,10 @@ import {
   LoginInput,
 } from '../../generated/graphql';
 import { userVar } from '../../graphql/reactiveVariables';
+import { ApolloError } from '@apollo/client';
 
 const AuthForm: React.FC = () => {
+  const [error, setError] = useState<string | null>(null);
   const { pathname } = useLocation();
   const history = useHistory();
   const [register, { loading: registerLoading }] = useRegisterMutation();
@@ -93,30 +96,35 @@ const AuthForm: React.FC = () => {
   const handleSubmit = async (
     values: LoginInput | RegisterInput,
   ): Promise<void> => {
-    if (isLoggingIn) {
-      const response = await login({
-        variables: { data: values as LoginInput },
-      });
-      if (response.data) {
-        const { token, user } = response.data.login;
-        userVar(user);
-        localStorage.setItem('token', token);
-        localStorage.setItem('expiresIn', (Date.now() + 3600000).toString());
+    try {
+      if (isLoggingIn) {
+        const response = await login({
+          variables: { data: values as LoginInput },
+        });
+        if (response.data) {
+          const { token, user } = response.data.login;
+          userVar(user);
+          localStorage.setItem('token', token);
+          localStorage.setItem('expiresIn', (Date.now() + 3600000).toString());
+        }
+      } else {
+        const response = await register({
+          variables: { data: values as RegisterInput },
+        });
+        if (response.data) {
+          const { token, user } = response.data.register;
+          userVar(user);
+          localStorage.setItem('token', token);
+          localStorage.setItem('expiresIn', (Date.now() + 3600000).toString());
+        }
       }
-    } else {
-      const response = await register({
-        variables: { data: values as RegisterInput },
-      });
-      if (response.data) {
-        const { token, user } = response.data.register;
-        userVar(user);
-        localStorage.setItem('token', token);
-        localStorage.setItem('expiresIn', (Date.now() + 3600000).toString());
-      }
+    } catch (error) {
+      setError(formatError(error.graphQLErrors[0]).message);
     }
   };
 
   const handleSwitch = (handleReset: () => void): void => {
+    setError(null);
     handleReset();
     if (isLoggingIn) history.push('/register');
     else history.push('/login');
@@ -131,6 +139,9 @@ const AuthForm: React.FC = () => {
       {({ handleReset, dirty, isValid }) => (
         <Form>
           <VStack h="100%" minW={450} spacing={4}>
+            <Text alignSelf="flex-start" color="red.600">
+              {error}
+            </Text>
             {fields
               .filter(({ hidden }) => !hidden)
               .map((field) => (

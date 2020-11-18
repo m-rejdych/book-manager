@@ -5,7 +5,6 @@ import {
   Column,
   ManyToOne,
   ManyToMany,
-  JoinTable,
 } from 'typeorm';
 import { ObjectType, Field, ID } from 'type-graphql';
 
@@ -24,13 +23,12 @@ class Book extends BaseEntity {
   @Field()
   title: string;
 
-  @ManyToMany(() => User, (user) => user.books, {
+  @ManyToOne(() => User, (user) => user.books, {
     cascade: true,
     onDelete: 'CASCADE',
   })
-  @JoinTable()
-  @Field(() => [User])
-  users: User[];
+  @Field(() => User)
+  user: User;
 
   @ManyToOne(() => Author, (author) => author.books, {
     cascade: true,

@@ -23,7 +23,6 @@ class Category extends BaseEntity {
 
   @ManyToMany(() => Book, (book) => book.categories, {
     cascade: true,
-    onDelete: 'CASCADE',
   })
   @JoinTable()
   @Field(() => [Book])

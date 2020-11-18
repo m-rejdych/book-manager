@@ -3,7 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   BaseEntity,
-  ManyToMany,
+  OneToMany,
 } from 'typeorm';
 import { ObjectType, Field, ID, Root } from 'type-graphql';
 
@@ -36,7 +36,7 @@ class User extends BaseEntity {
     return `${parent.firstName} ${parent.lastName}`;
   }
 
-  @ManyToMany(() => Book, (book) => book.users, {
+  @OneToMany(() => Book, (book) => book.user, {
     cascade: ['insert', 'update'],
   })
   @Field(() => [Book])
