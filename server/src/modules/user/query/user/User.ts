@@ -23,7 +23,7 @@ class User {
 
     if (!id) {
       const { userId } = ctx.user;
-      const user = await UserEntity.findOne(userId);
+      const user = await UserEntity.findOne(userId, { relations: ['books'] });
       if (!user) throw new Error('User not found!');
       return user;
     }
