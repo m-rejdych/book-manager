@@ -11,6 +11,7 @@ import ColorModeSwitcher from './components/ColorModeSwitcher';
 import { Route, Redirect, Switch } from 'react-router-dom';
 
 import Auth from './pages/Auth';
+import Home from './pages/Home';
 import { useUserLazyQuery } from './generated/graphql';
 import { userVar } from './graphql/reactiveVariables';
 
@@ -32,7 +33,7 @@ const App: React.FC = () => {
 
   const routes = user?.id ? (
     <Switch>
-      <Route path="/home" />
+      <Route path="/home" component={Home} />
       <Redirect to="/home" />
     </Switch>
   ) : (

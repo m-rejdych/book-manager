@@ -14,11 +14,18 @@ export type Scalars = {
 export type Query = {
   __typename?: 'Query';
   user: User;
+  users: Array<User>;
+  book: Book;
 };
 
 
 export type QueryUserArgs = {
   id?: Maybe<Scalars['ID']>;
+};
+
+
+export type QueryBookArgs = {
+  bookId: Scalars['ID'];
 };
 
 export type User = {
@@ -28,12 +35,34 @@ export type User = {
   firstName: Scalars['String'];
   lastName: Scalars['String'];
   fullName: Scalars['String'];
+  books: Array<Book>;
+};
+
+export type Book = {
+  __typename?: 'Book';
+  id: Scalars['ID'];
+  title: Scalars['String'];
+  author: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  isRead: Scalars['Boolean'];
+  user: User;
+  category: Category;
+};
+
+export type Category = {
+  __typename?: 'Category';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  books: Array<Book>;
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
   register: RegisterResponse;
   login: RegisterResponse;
+  createBook: Book;
+  updateBook: Book;
+  deleteBook: Scalars['ID'];
 };
 
 
@@ -44,6 +73,21 @@ export type MutationRegisterArgs = {
 
 export type MutationLoginArgs = {
   data: LoginInput;
+};
+
+
+export type MutationCreateBookArgs = {
+  data: CreateBookInput;
+};
+
+
+export type MutationUpdateBookArgs = {
+  data: UpdateBookInput;
+};
+
+
+export type MutationDeleteBookArgs = {
+  bookId: Scalars['ID'];
 };
 
 export type RegisterResponse = {
@@ -64,6 +108,23 @@ export type LoginInput = {
   password: Scalars['String'];
 };
 
+export type CreateBookInput = {
+  title: Scalars['String'];
+  author: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  isRead: Scalars['Boolean'];
+  category: Scalars['String'];
+};
+
+export type UpdateBookInput = {
+  bookId: Scalars['ID'];
+  title: Scalars['String'];
+  author: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  isRead: Scalars['Boolean'];
+  category: Scalars['String'];
+};
+
 export type LoginMutationVariables = Exact<{
   data: LoginInput;
 }>;
@@ -76,7 +137,7 @@ export type LoginMutation = (
     & Pick<RegisterResponse, 'token'>
     & { user: (
       { __typename?: 'User' }
-      & Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'fullName'>
+      & Pick<User, 'id' | 'fullName'>
     ) }
   ) }
 );
@@ -111,6 +172,17 @@ export type UserQuery = (
   ) }
 );
 
+export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UsersQuery = (
+  { __typename?: 'Query' }
+  & { users: Array<(
+    { __typename?: 'User' }
+    & Pick<User, 'id' | 'fullName'>
+  )> }
+);
+
 
 export const LoginDocument = gql`
     mutation Login($data: LoginInput!) {
@@ -118,9 +190,6 @@ export const LoginDocument = gql`
     token
     user {
       id
-      email
-      firstName
-      lastName
       fullName
     }
   }
@@ -227,3 +296,36 @@ export function useUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserQ
 export type UserQueryHookResult = ReturnType<typeof useUserQuery>;
 export type UserLazyQueryHookResult = ReturnType<typeof useUserLazyQuery>;
 export type UserQueryResult = Apollo.QueryResult<UserQuery, UserQueryVariables>;
+export const UsersDocument = gql`
+    query Users {
+  users {
+    id
+    fullName
+  }
+}
+    `;
+
+/**
+ * __useUsersQuery__
+ *
+ * To run a query within a React component, call `useUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUsersQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useUsersQuery(baseOptions?: Apollo.QueryHookOptions<UsersQuery, UsersQueryVariables>) {
+        return Apollo.useQuery<UsersQuery, UsersQueryVariables>(UsersDocument, baseOptions);
+      }
+export function useUsersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UsersQuery, UsersQueryVariables>) {
+          return Apollo.useLazyQuery<UsersQuery, UsersQueryVariables>(UsersDocument, baseOptions);
+        }
+export type UsersQueryHookResult = ReturnType<typeof useUsersQuery>;
+export type UsersLazyQueryHookResult = ReturnType<typeof useUsersLazyQuery>;
+export type UsersQueryResult = Apollo.QueryResult<UsersQuery, UsersQueryVariables>;
