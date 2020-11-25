@@ -12,6 +12,7 @@ import { Route, Redirect, Switch } from 'react-router-dom';
 
 import Auth from './pages/Auth';
 import Home from './pages/Home';
+import User from './pages/User';
 import { useUserLazyQuery } from './generated/graphql';
 import { userVar } from './graphql/reactiveVariables';
 
@@ -34,6 +35,7 @@ const App: React.FC = () => {
   const routes = user?.id ? (
     <Switch>
       <Route path="/home" component={Home} />
+      <Route path="/user/:userId" component={User} />
       <Redirect to="/home" />
     </Switch>
   ) : (

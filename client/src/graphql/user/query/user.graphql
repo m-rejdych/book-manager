@@ -5,5 +5,16 @@ query User($id: ID) {
     firstName
     lastName
     fullName
+    books {
+      id
+      title
+      description
+      author
+      isRead
+      category {
+        id
+        name
+      }
+    }
   }
 }

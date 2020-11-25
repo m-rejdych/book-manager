@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { useReactiveVar } from '@apollo/client';
 import { Center, Text, Button, HStack, Input, Box } from '@chakra-ui/react';
 
 import Card from '../../components/Card';
 import UsersList from '../../components/UsersList';
 import { useUsersQuery } from '../../generated/graphql';
+import { userVar } from '../../graphql/reactiveVariables';
 
 interface User {
   id: string;
@@ -14,6 +17,8 @@ const Home: React.FC = () => {
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const { data } = useUsersQuery();
+  const user = useReactiveVar(userVar);
+  const history = useHistory();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setValue(e.target.value);
@@ -40,7 +45,12 @@ const Home: React.FC = () => {
               books
             </Text>
           </Text>
-          <Button colorScheme="teal">See your books</Button>
+          <Button
+            onClick={() => history.push(`/user/${user!.id}`)}
+            colorScheme="teal"
+          >
+            See your books
+          </Button>
         </Card>
         <Card>
           <Text fontSize="4xl" fontWeight={500}>
