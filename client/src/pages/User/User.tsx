@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   Box,
   Text,
@@ -9,9 +10,10 @@ import {
   Flex,
   Button,
   useDisclosure,
+  IconButton,
 } from '@chakra-ui/react';
 import { useReactiveVar } from '@apollo/client';
-import { CheckIcon, CloseIcon } from '@chakra-ui/icons';
+import { CheckIcon, CloseIcon, ArrowBackIcon } from '@chakra-ui/icons';
 import { useParams } from 'react-router-dom';
 
 import Card from '../../components/Card';
@@ -31,6 +33,7 @@ const User: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const user = useReactiveVar(userVar);
   const books = useReactiveVar(booksVar);
+  const history = useHistory();
   const [deleteBook] = useDeleteBookMutation();
 
   useEffect(() => {
@@ -65,7 +68,7 @@ const User: React.FC = () => {
   };
 
   return (
-    <Box minH="100vh" p={8}>
+    <Box position="relative" minH="100vh" p={8}>
       {loading ? (
         <Center height="100%">
           <CircularProgress isIndeterminate color="teal" />
@@ -73,7 +76,15 @@ const User: React.FC = () => {
       ) : (
         <Stack spacing={6}>
           <Flex justify="space-between" align="center">
-            <Text fontSize={48}>{data?.user.fullName}</Text>
+            <HStack spacing={12}>
+              <IconButton
+                onClick={(): void => history.goBack()}
+                aria-label="go-back"
+              >
+                <ArrowBackIcon fontSize={20} />
+              </IconButton>
+              <Text fontSize={48}>{data?.user.fullName}</Text>
+            </HStack>
             {isMe && (
               <Button onClick={onOpen} mr={10}>
                 Add book
@@ -100,29 +111,31 @@ const User: React.FC = () => {
                     )}
                   </HStack>
                   <Text fontSize={24}>Category: {category.name}</Text>
-                  <HStack spacing={4}>
-                    <Button
-                      onClick={(): void =>
-                        handleStartEditing({
-                          title,
-                          description,
-                          author,
-                          isRead,
-                          category: category.name,
-                          bookId: id,
-                        })
-                      }
-                      colorScheme="teal"
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      onClick={() => handleDeleteBook(id)}
-                      colorScheme="red"
-                    >
-                      Delete
-                    </Button>
-                  </HStack>
+                  {user?.id === userId && (
+                    <HStack spacing={4}>
+                      <Button
+                        onClick={(): void =>
+                          handleStartEditing({
+                            title,
+                            description,
+                            author,
+                            isRead,
+                            category: category.name,
+                            bookId: id,
+                          })
+                        }
+                        colorScheme="teal"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        onClick={(): Promise<void> => handleDeleteBook(id)}
+                        colorScheme="red"
+                      >
+                        Delete
+                      </Button>
+                    </HStack>
+                  )}
                 </Card>
               ),
             )}

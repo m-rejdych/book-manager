@@ -1,4 +1,5 @@
 import React, { Fragment } from 'react';
+import { useHistory } from 'react-router-dom';
 import { List, ListItem, useColorMode, Divider } from '@chakra-ui/react';
 
 interface User {
@@ -12,6 +13,11 @@ interface Props {
 
 const UsersList: React.FC<Props> = ({ users }) => {
   const { colorMode } = useColorMode();
+  const history = useHistory();
+
+  const handleGoToUser = (id: string): void => {
+    history.push(`/user/${id}`);
+  };
 
   return (
     <List
@@ -35,6 +41,7 @@ const UsersList: React.FC<Props> = ({ users }) => {
             }}
             cursor="pointer"
             p={1}
+            onClick={(): void => handleGoToUser(id)}
           >
             {fullName}
           </ListItem>

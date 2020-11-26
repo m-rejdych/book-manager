@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useReactiveVar } from '@apollo/client';
+import { useReactiveVar, useApolloClient } from '@apollo/client';
 import { Center, Text, Button, HStack, Input, Box } from '@chakra-ui/react';
 
 import Card from '../../components/Card';
 import UsersList from '../../components/UsersList';
 import { useUsersQuery } from '../../generated/graphql';
-import { userVar } from '../../graphql/reactiveVariables';
+import { userVar, booksVar } from '../../graphql/reactiveVariables';
 
 interface User {
   id: string;
@@ -19,6 +19,7 @@ const Home: React.FC = () => {
   const { data } = useUsersQuery();
   const user = useReactiveVar(userVar);
   const history = useHistory();
+  const client = useApolloClient();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setValue(e.target.value);
@@ -32,8 +33,15 @@ const Home: React.FC = () => {
     );
   };
 
+  const handleLogout = (): void => {
+    userVar(null);
+    booksVar([]);
+    localStorage.clear();
+    client.clearStore();
+  };
+
   return (
-    <Center h="100vh">
+    <Center h="100vh" position="relative">
       <HStack spacing={6} h="100%">
         <Card>
           <Text fontSize="4xl" fontWeight={500}>
@@ -80,6 +88,9 @@ const Home: React.FC = () => {
             )}
           </Box>
         </Card>
+        <Button onClick={handleLogout} position="absolute" top={10} left={10}>
+          Logout
+        </Button>
       </HStack>
     </Center>
   );
