@@ -22,3 +22,5 @@ interface User {
 }
 
 export const userVar = makeVar<Partial<User> | null>(null);
+
+export const booksVar = makeVar<Book[]>([]);

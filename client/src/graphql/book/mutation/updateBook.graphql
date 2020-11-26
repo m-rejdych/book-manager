@@ -1,13 +1,13 @@
-mutation CreateBook($data: CreateBookInput!) {
-  createBook(data: $data) {
+mutation UpdateBook($data: UpdateBookInput!) {
+  updateBook(data: $data) {
     id
     title
     author
     description
-    isRead
     category {
       id
       name
     }
+    isRead
   }
 }

@@ -10,6 +10,7 @@ const Card: React.FC = ({ children }) => {
       h={400}
       w={300}
       p={4}
+      m={4}
       borderRadius="lg"
       bgColor={colorMode === 'light' ? 'gray.200' : 'gray.700'}
       boxShadow="0 3px 7px #000"

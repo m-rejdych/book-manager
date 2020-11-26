@@ -1,20 +1,34 @@
 import React, { useState } from 'react';
 import { Formik, Form } from 'formik';
 import { Checkbox, FormLabel, FormControl, Button } from '@chakra-ui/react';
+import { useReactiveVar } from '@apollo/client';
 
 import InputElement from '../InputElement';
-import { useCreateBookMutation } from '../../generated/graphql';
+import {
+  useCreateBookMutation,
+  UpdateBookInput,
+  useUpdateBookMutation,
+} from '../../generated/graphql';
+import { booksVar } from '../../graphql/reactiveVariables';
 
-const AddBookForm: React.FC = () => {
-  const [isChecked, setIsChecked] = useState(false);
-  const [createBook] = useCreateBookMutation();
+interface Props {
+  onClose: () => void;
+  isEditing?: boolean;
+  editData?: UpdateBookInput | null;
+}
+
+const AddBookForm: React.FC<Props> = ({ onClose, isEditing, editData }) => {
+  const [isChecked, setIsChecked] = useState(editData?.isRead || false);
+  const [createBook, { loading: createLoading }] = useCreateBookMutation();
+  const [updateBook, { loading: updateLoading }] = useUpdateBookMutation();
+  const books = useReactiveVar(booksVar);
 
   const initialValues = {
-    title: '',
-    author: '',
-    description: '',
-    isRead: false,
-    category: '',
+    title: editData?.title || '',
+    author: editData?.author || '',
+    description: editData?.description || '',
+    isRead: editData?.isRead || false,
+    category: editData?.category || '',
   };
 
   const fields = [
@@ -61,8 +75,23 @@ const AddBookForm: React.FC = () => {
   ];
 
   const handleSubmit = async (values: typeof initialValues): Promise<void> => {
-    const response = await createBook({ variables: { data: values } });
-    console.log(response);
+    if (isEditing) {
+      const response = await updateBook({
+        variables: { data: { ...values, bookId: editData!.bookId } },
+      });
+      if (response.data) {
+        const { updateBook: book } = response.data;
+        booksVar(books.map((b) => (b.id === book.id ? book : b)));
+        onClose();
+      }
+    } else {
+      const response = await createBook({ variables: { data: values } });
+      if (response.data) {
+        const { createBook: book } = response.data;
+        booksVar([...books, book]);
+        onClose();
+      }
+    }
   };
 
   const toggleCheck = (
@@ -76,7 +105,7 @@ const AddBookForm: React.FC = () => {
 
   return (
     <Formik initialValues={initialValues} onSubmit={handleSubmit}>
-      {({ setFieldValue }) => (
+      {({ setFieldValue, dirty, isValid }) => (
         <Form>
           {fields.map((field) => (
             <InputElement key={field.name} {...field} />
@@ -88,8 +117,13 @@ const AddBookForm: React.FC = () => {
               onChange={(): void => toggleCheck(setFieldValue)}
             />
           </FormControl>
-          <Button type="submit" colorScheme="teal">
-            Add
+          <Button
+            disabled={!isValid || !dirty}
+            type="submit"
+            colorScheme="teal"
+            isLoading={updateLoading || createLoading}
+          >
+            {isEditing ? 'Edit' : 'Add'}
           </Button>
         </Form>
       )}
